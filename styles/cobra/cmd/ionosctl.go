@@ -1,12 +1,10 @@
 package cmd
 
 import (
-	"fmt"
-	sdk "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"ionos-cli-samples/pkg/die"
-	"log"
+	"ionos-cli-samples/pkg/must"
+	"ionos-cli-samples/styles/cobra/cmd/compute"
 	"os"
 )
 
@@ -14,26 +12,28 @@ var (
 	Root = &cobra.Command{
 		Use:   "ionosctl",
 		Short: "ionosctl powered by cobra",
-		Run: func(cmd *cobra.Command, args []string) {
-
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return cmd.Help()
 		},
 	}
 	cfgFile string
-	Client  *sdk.APIClient
 	//Version string
 )
 
 func Execute() {
 	if err := Root.Execute(); err != nil {
-		die.Die(err.Error())
+		must.Die(err.Error())
 	}
 }
 func init() {
 	cobra.OnInitialize(initConfig)
+
+	Root.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.ionosctl.yaml)")
+
+	Root.AddCommand(compute.Compute)
 }
 
 func initConfig() {
-	log.Print("Reading config...")
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
@@ -49,17 +49,6 @@ func initConfig() {
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		//fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
-
-	Client = sdk.NewAPIClient(
-		sdk.NewConfiguration(
-			viper.GetString("IONOS_USERNAME"),
-			viper.GetString("IONOS_PASSWORD"),
-			viper.GetString("IONOS_TOKEN"),
-			viper.GetString("IONOS_API_URL"),
-		),
-	)
-
-	log.Println(Client.GetConfig().Token)
 }
