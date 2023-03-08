@@ -3,7 +3,6 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"ionos-cli-samples/pkg/must"
 	"ionos-cli-samples/styles/cobra/cmd/compute"
 	"os"
 )
@@ -12,8 +11,7 @@ var (
 	Root = &cobra.Command{
 		Use:   "ionosctl",
 		Short: "ionosctl powered by cobra",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return cmd.Help()
+		Run: func(cmd *cobra.Command, args []string) {
 		},
 	}
 	cfgFile string
@@ -22,7 +20,8 @@ var (
 
 func Execute() {
 	if err := Root.Execute(); err != nil {
-		must.Die(err.Error())
+		//must.Die(err.Error()) // Apparently if err != nil; the error is printed before entering this block
+		os.Exit(1)
 	}
 }
 func init() {
@@ -31,6 +30,7 @@ func init() {
 	Root.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.ionosctl.yaml)")
 
 	Root.AddCommand(compute.Compute)
+	Root.SilenceUsage = true
 }
 
 func initConfig() {
@@ -49,6 +49,6 @@ func initConfig() {
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err == nil {
-		//fmt.Println("Using config file:", viper.ConfigFileUsed())
+		//log.Println("Using config file:", viper.ConfigFileUsed())
 	}
 }

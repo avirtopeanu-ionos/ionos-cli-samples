@@ -2,16 +2,16 @@ package compute
 
 import (
 	"github.com/spf13/cobra"
+	"ionos-cli-samples/styles/cobra/cmd/compute/server"
 )
 
 func init() {
-	Compute.AddCommand(server)
+	Compute.AddCommand(server.Server)
 }
 
 var Compute = &cobra.Command{
 	Use:   "compute",
 	Short: "IONOS Cloud V6 API",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return cmd.Help()
+	Run: func(cmd *cobra.Command, args []string) {
 	},
 }

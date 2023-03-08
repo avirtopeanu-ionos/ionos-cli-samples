@@ -6,7 +6,6 @@ import (
 	"sync"
 )
 
-var clientCompute *compute.APIClient
 var once sync.Map
 
 // Compute returns the initialized Compute API V6 client
@@ -22,14 +21,14 @@ func Compute() *compute.APIClient {
 }
 
 func loadComputeClient() *compute.APIClient {
-	return compute.NewAPIClient(
-		compute.NewConfiguration(
-			viper.GetString("IONOS_USERNAME"),
-			viper.GetString("IONOS_PASSWORD"),
-			viper.GetString("IONOS_TOKEN"),
-			viper.GetString("IONOS_API_URL"),
-		),
+	conf := compute.NewConfiguration(
+		viper.GetString("IONOS_USERNAME"),
+		viper.GetString("IONOS_PASSWORD"),
+		viper.GetString("IONOS_TOKEN"),
+		viper.GetString("IONOS_API_URL"),
 	)
+	conf.SetDepth(1)
+	return compute.NewAPIClient(conf)
 }
 
 // GetPostgresClient

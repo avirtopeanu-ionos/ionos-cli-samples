@@ -24,7 +24,9 @@ func Dief(help string, x error) {
 
 // Must dies if error is not nil
 func Must(err error) {
-	Mustf("fatal", err)
+	if err != nil {
+		Die(err.Error())
+	}
 }
 
 // Mustf dies if error is not nil with a custom message
