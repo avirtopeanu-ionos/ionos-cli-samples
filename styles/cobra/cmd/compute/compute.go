@@ -7,6 +7,8 @@ import (
 
 func init() {
 	Compute.AddCommand(server.Server)
+
+	Compute.PersistentFlags().Int32P("depth", "d", 1, "Request depth")
 }
 
 var Compute = &cobra.Command{

@@ -23,15 +23,15 @@ var ls = &cobra.Command{
 		)
 	},
 	RunE: func(c *cobra.Command, args []string) error {
-		_, resp, err := client.Compute().ServersApi.DatacentersServersGet(
+		dcs, resp, err := client.Compute().ServersApi.DatacentersServersGet(
 			context.Background(),
 			must.Get(c.Flags().GetString(constants.FlagIdDatacenter)),
-		).Execute()
+		).Depth(must.Get(c.Flags().GetInt32("depth"))).Execute()
 		if err != nil {
 			return fmt.Errorf("failed getting servers: %s", resp.Status)
 		}
 
-		json, err := json.Marshal(resp)
+		json, err := json.Marshal(dcs)
 		if err != nil {
 			return err
 		}
