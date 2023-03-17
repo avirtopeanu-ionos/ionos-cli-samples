@@ -2,13 +2,13 @@ package server
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/spf13/cobra"
 	"ionos-cli-samples/pkg/client"
 	"ionos-cli-samples/pkg/must"
 	"ionos-cli-samples/styles/cobra/internal/constants"
+	"ionos-cli-samples/styles/cobra/internal/printer"
 )
 
 func init() {
@@ -31,12 +31,13 @@ var ls = &cobra.Command{
 			return fmt.Errorf("failed getting servers: %s", resp.Status)
 		}
 
-		json, err := json.Marshal(dcs)
-		if err != nil {
-			return err
-		}
+		//json, err := json.Marshal(dcs)
+		//if err != nil {
+		//	return err
+		//}
 
-		fmt.Printf(string(json) + "\n")
+		//fmt.Printf(string(json) + "\n")
+		printer.PrintTable((*dcs.Items)[0])
 		return nil
 	},
 }
