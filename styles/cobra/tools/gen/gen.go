@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
 	"github.com/getkin/kin-openapi/openapi3"
 	"golang.org/x/exp/slices"
@@ -12,14 +13,33 @@ import (
 )
 
 func main() {
-	const openAPIFile = "dataplatform.yaml"
-	swagger, err := openapi3.NewLoader().LoadFromFile(openAPIFile)
+	openAPIFile := flag.String("s", "dataplatform.yaml", "Path to the OpenAPI spec file (required)")
+	operationID := flag.String("i", "", "Operation ID to generate the CLI command for (required or -l)")
+	listOperationIDs := flag.Bool("l", false, "List all operation IDs instead of generating a command (required or -i)")
+	out := flag.String("o", "generated_command", "Output file")
+	flag.Parse()
+
+	if *openAPIFile == "" {
+		flag.Usage()
+		os.Exit(1)
+	}
+
+	swagger, err := openapi3.NewLoader().LoadFromFile(*openAPIFile)
 	if err != nil {
 		panic(err)
 	}
 
-	operationID := "clustersNodepoolsDelete"
-	operation, _, method, err := findOperation(swagger, operationID)
+	if *listOperationIDs {
+		printOperationIDs(swagger)
+		return
+	}
+
+	if *operationID == "" {
+		flag.Usage()
+		os.Exit(1)
+	}
+
+	operation, _, method, err := findOperation(swagger, *operationID)
 	if err != nil {
 		panic(err)
 	}
@@ -32,7 +52,7 @@ func main() {
 	log.Printf("Extracted flags: %+v\n", flags)
 
 	command := CLICommand{
-		FunctionName:     pascalCase(operationID),
+		FunctionName:     pascalCase(*operationID),
 		Namespace:        "dataplatform",
 		Resource:         "nodepool",
 		Verb:             strings.ToLower(method),
@@ -57,7 +77,7 @@ func main() {
 	}
 
 	// Write the output to a file or print it
-	f, err := os.Create("generated_command.go")
+	f, err := os.Create(fmt.Sprintf("%s.go", *out))
 	if err != nil {
 		panic(err)
 	}
@@ -66,6 +86,15 @@ func main() {
 	_, err = f.Write(buf.Bytes())
 	if err != nil {
 		panic(err)
+	}
+}
+
+// Func called if `-l` set
+func printOperationIDs(swagger *openapi3.T) {
+	for _, pathItem := range swagger.Paths {
+		for _, operation := range pathItem.Operations() {
+			fmt.Println(operation.OperationID)
+		}
 	}
 }
 
